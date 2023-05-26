@@ -1,1 +1,7 @@
+# grovepi requirements
 grovepi
+
+# GCP requirements
+cloud-sql-python-connector[pymysql]
+sqlalchemy
+configparser
