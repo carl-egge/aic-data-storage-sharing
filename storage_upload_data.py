@@ -10,7 +10,8 @@ import os, sys, argparse, time, signal
 
 # Imports for the GrovePi
 import grovepi
-
+import time
+import sqlite3
 # Imports for the encryption
 
 # Imports for the database connection
@@ -40,6 +41,56 @@ signal.signal(signal.SIGINT, signal_handler)
 # grovepi library for this. For now we can just use a predefined batch size and
 # store the data in a simple data structure like a list or dictionary.
 
+
+# Establish a connection to the SQLite database
+connection = sqlite3.connect('sensor_data.db')
+cursor = connection.cursor()
+
+# Create a table to store the sensor data
+create_table_query = '''CREATE TABLE IF NOT EXISTS sensor_data (
+                            id INTEGER PRIMARY KEY AUTOINCREMENT,
+                            timestamp DATETIME DEFAULT (datetime('now', 'localtime')),
+                            pollution_level TEXT,
+                            sensor_value INTEGER
+                        );'''
+cursor.execute(create_table_query)
+
+# Connect the Grove Air Quality Sensor to analog port A0
+# SIG,NC,VCC,GND
+air_sensor = 0
+
+grovepi.pinMode(air_sensor, "INPUT")
+
+while True:
+    try:
+        # Get sensor value
+        sensor_value = grovepi.analogRead(air_sensor)
+
+        if sensor_value > 700:
+            pollution_level = "High pollution"
+        elif sensor_value > 300:
+            pollution_level = "Low pollution"
+        else:
+            pollution_level = "Air fresh"
+
+        print("pollution_level =", pollution_level)
+        print("sensor_value =", sensor_value)
+
+        # Insert sensor data into the table
+        insert_query = "INSERT INTO sensor_data (pollution_level, sensor_value) VALUES (?, ?)"
+        cursor.execute(insert_query, (pollution_level, sensor_value))
+
+        # Commit the changes to the database
+        connection.commit()
+
+        time.sleep(2)
+
+    except IOError:
+        print("Error")
+
+# Close the cursor and connection
+cursor.close()
+connection.close()
 
 
 
