@@ -11,9 +11,7 @@
 
 **Team Coordinator:**
 
-Mohammad Rayhanur Rahman
-
-Email: mohammad.rayhanur.rahman@nithh.de
+Mohammad Rayhanur Rahman (mohammad.rayhanur.rahman@nithh.de)
 
 ## Getting Started
 

@@ -10,12 +10,14 @@ import os, sys, argparse, time, signal
 
 # Imports for the GrovePi
 import grovepi
-import time
-import sqlite3
-# Imports for the encryption
+import sqlalchemy
 
-# Imports for the database connection
-# I would recommend 'mysql.connector' or 'sqlalchemy' or something like that
+# local imports
+from encryption.symmetric import encrypt_data, read_key
+from gcp.get_sql_connection import getconn
+
+# temporary imports
+import sqlite3
 
 #-------------------------------------------------------------------------------
 
@@ -34,7 +36,17 @@ signal.signal(signal.SIGINT, signal_handler)
 
 #-------------------------------------------------------------------------------
 
-# TODO: Ahmad, please write a function that consumes the data from the grovepi
+# TODO: Ahmad, change this such that it consumes the data from the grovepi sensors
+# and stores it in this dictionary:
+
+# data = {
+#     'time': "",
+#     'pollution_level': "",
+#     'sensor_value': 0,
+#     'sensor_type': "",
+# }
+
+data = {}
 
 ####################  Grovepi sensor data consumption  #########################
 # In this section we consume the data from the grovepi sensors. We can use the
@@ -61,7 +73,10 @@ air_sensor = 0
 
 grovepi.pinMode(air_sensor, "INPUT")
 
-while True:
+# If this should run forever we need to export this to a worker
+# in order to not block the main thread
+i = 0
+while i < 20:
     try:
         # Get sensor value
         sensor_value = grovepi.analogRead(air_sensor)
@@ -84,6 +99,7 @@ while True:
         connection.commit()
 
         time.sleep(2)
+        i += 1
 
     except IOError:
         print("Error")
@@ -93,42 +109,49 @@ cursor.close()
 connection.close()
 
 
-
-
-
-
-
-
-
 #-------------------------------------------------------------------------------
 
-# TODO: Rayhan, please write a function that encrypts the data
+###########################    Data encryption    ##############################
 
-#################### Symmetric encryption of the data  #########################
-# In this section we encrypt the data using a symmetric encryption scheme. I am
-# sure there are helpful libraries. Goal should just be to turn some plaintext
-# string into a ciphertext string. The key should be stored in a separate file.
+# Convert to string
+data_str = str(data)
 
-
-
-
-
-
-
-
-
+# Call encryption function
+encrypted_data = encrypt_data(data_str, read_key())
 
 #-------------------------------------------------------------------------------
-
-# TODO: Lingo, please write a function that uploads the data to a local database
 
 #################### Upload data to cloud storage  #############################
-# In this section we upload the data to the database. For now we can just use a
-# local database on the Raspberry Pi. Later we can switch to the cloud storage.
-# You can use sqlite3 for a small database in the file system or mysql for a
-# local database server. For that you would need to install and start MariaDB or 
-# MySQL on the Raspberry Pi. I would recommend to use a local database server.
+
+# create connection pool
+pool = sqlalchemy.create_engine(
+    "mysql+pymysql://",
+    creator=getconn,
+)
+
+# connect to connection pool
+with pool.connect() as db_conn:
+  # TODO: Create table sql statement for the sensor data table
+  # The columns should be: id, encrypted_data
+  db_conn.execute(
+    sqlalchemy.text(
+      "CREATE TABLE IF NOT EXISTS ..."
+    )
+  )
+
+  db_conn.commit()
+
+  # insert data into our ratings table
+  # TODO: Insert the encrypted data into the table
+  insert_stmt = sqlalchemy.text(
+      "INSERT INTO ...",
+  )
+
+  # insert entries into table
+  db_conn.execute(insert_stmt, parameters={"encrypted_data": encrypted_data})
+
+  # commit transactions
+  db_conn.commit()
 
 
-
-
+print("Success! Data uploaded to cloud storage!")

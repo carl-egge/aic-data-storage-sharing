@@ -5,3 +5,6 @@ grovepi
 cloud-sql-python-connector[pymysql]
 sqlalchemy
 configparser
+
+# Cryptography
+cryptography

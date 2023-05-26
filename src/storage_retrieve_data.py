@@ -6,11 +6,13 @@
 # decrypted on the raspberry pi that uploaded the data because it holds the key.
 
 # General imports (maybe we don't need all of them)
-import os, sys, argparse, time, signal
+import sys, signal
 
-# Imports for the decryption
+import sqlalchemy
 
-# Imports for the database connection
+# local imports
+from encryption.symmetric import decrypt_data, read_key
+from gcp.get_sql_connection import getconn
 
 #-------------------------------------------------------------------------------
 
@@ -23,6 +25,20 @@ signal.signal(signal.SIGINT, signal_handler)
 
 #-------------------------------------------------------------------------------
 
-print('Not implemented yet! Bye!')
+# create connection pool
+pool = sqlalchemy.create_engine(
+    "mysql+pymysql://",
+    creator=getconn,
+)
 
+# connect to connection pool
+with pool.connect() as db_conn:
+  # query and fetch test table
+  results = db_conn.execute(sqlalchemy.text("SELECT * FROM test")).fetchall()
 
+  # show results
+  for row in results:
+    # decrypt data
+    decrypt_data = decrypt_data(row[1], read_key())
+
+    print(f"Decrypted data: {decrypt_data}\n")
