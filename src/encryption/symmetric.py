@@ -36,12 +36,3 @@ def decrypt_data(data, key):
 # This function reads the key from the filesystem
 def read_key():
     return encryption_key
-
- # Encrypt the data
-plaintext = "I can encrypt data!"
-encrypted_data = encrypt_data(plaintext, encryption_key)
-print("Encrypted data:", encrypted_data)
-
-# Decrypt the encrypted data
-decrypted_data = decrypt_data(encrypted_data, encryption_key)
-print("Decrypted data:", decrypted_data.decode())
