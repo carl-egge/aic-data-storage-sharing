@@ -15,6 +15,9 @@ def generate_key():
 
 encryption_key = generate_key()
 
+with open("encryption_key_storage.txt", "w") as texttxt:
+    texttxt.write(str(generate_key()))
+
 # This function encrypts the data with the key and returns
 # the encrypted data as a string
 def encrypt_data(data, key):
