@@ -12,30 +12,29 @@
 import os, sys
 from google.cloud.sql.connector import Connector
 import sqlalchemy
-import configparser
+from dotenv import load_dotenv
 
 # GCP IAM authentication using service account key
-# TODO: In order for this script to work you need to create a service account key, store the JSON and update the path below!
 # How to create a service account key: https://cloud.google.com/iam/docs/keys-create-delete?hl=de#iam-service-account-keys-create-console
 # Alternatively you can authenticate using the Google Cloud SDK.
-credential_path = "/home/carl-egge/aic/aic23-groupb1-data-storage-4f89199ed283.json" # IMPORTANT: Change this to your own path
+credential_path = "/home/pi/aic/gcp_key/aic23-groupb1-data-storage-4f89199ed283.json" # IMPORTANT: Change this to your own path
 os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = credential_path
 
 # set config
-# TODO: The .env file with the database credentials is needed for this to work.
-parser = configparser.ConfigParser()
-parser.read(".env")
+load_dotenv()
 
-project_id = parser.get("DEFAULT", "project_id")
-region = parser.get("DEFAULT", "region")
-instance_name = parser.get("DEFAULT", "instance_name")
-db_user = parser.get("DEFAULT", "db_user")
-db_pass = parser.get("DEFAULT", "db_pass")
-db_name = parser.get("DEFAULT", "db_name")
+project_id = os.getenv("project_id")
+region = os.getenv("region")
+instance_name = os.getenv("instance_name")
+db_user = os.getenv("db_user")
+db_pass = os.getenv("db_pass")
+db_name = os.getenv("db_name")
+
+print("DB: ", db_name)
 
 # initialize parameters
-INSTANCE_CONNECTION_NAME = f"{project_id}:{region}:{instance_name}"
-print(f"Your instance connection name is: {INSTANCE_CONNECTION_NAME}")
+INSTANCE_CONNECTION_NAME = "%s:%s:%s" % (project_id, region, instance_name)
+print("Your instance connection name is: ", INSTANCE_CONNECTION_NAME)
 
 # initialize Connector object
 connector = Connector()
@@ -80,7 +79,7 @@ with pool.connect() as db_conn:
 
   # insert entries into table
   db_conn.execute(insert_stmt, parameters={"name": "HOTDOG", "origin": "Germany", "rating": 7.5})
-  db_conn.execute(insert_stmt, parameters={"name": "BÀNH MÌ", "origin": "Vietnam", "rating": 9.1})
+  db_conn.execute(insert_stmt, parameters={"name": "BANH MI", "origin": "Vietnam", "rating": 9.1})
   db_conn.execute(insert_stmt, parameters={"name": "CROQUE MADAME", "origin": "France", "rating": 8.3})
 
   # commit transactions
