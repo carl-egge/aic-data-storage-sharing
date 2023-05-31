@@ -1,10 +1,10 @@
 # grovepi requirements
-grovepi
+# grovepi
+
+# Cryptography
+cryptography==3.3.2
 
 # GCP requirements
 cloud-sql-python-connector[pymysql]
 sqlalchemy
-configparser
-
-# Cryptography
-cryptography
+python-dotenv
