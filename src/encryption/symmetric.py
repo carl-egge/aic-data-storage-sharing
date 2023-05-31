@@ -32,7 +32,7 @@ def decrypt_data(data, key):
 
 # This function reads the key from the filesystem
 def read_key():
-    print("Not implemented yet!")
+    return encryption_key
 
  # Encrypt the data
 plaintext = "I can encrypt data!"
