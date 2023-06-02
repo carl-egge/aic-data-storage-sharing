@@ -15,20 +15,12 @@ def generate_encryption_key():
     with open("../encryption_key_storage.txt", "w") as texttxt:
         texttxt.write(encoded_key)
 
-#generate_encryption_key()
-
 # This function reads the key from the filesystem
 def read_key():
     with open("../encryption_key_storage.txt", "r") as file:
         encoded_key = file.read()
         encryption_key = encoded_key.encode() # Convert string to bytes
     return encryption_key
-
-# Test the read_key function
-generate_encryption_key()
-key = read_key()
-print(type(key))
-print(key)
 
 # This function encrypts the data with the key and returns
 # the encrypted data as a string
