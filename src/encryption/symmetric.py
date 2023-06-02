@@ -5,7 +5,6 @@
 # the filesystem.
 
 # imports
-import cryptography
 from cryptography.fernet import Fernet
 
 # This function generates a new key and stores it in the filesystem

@@ -13,3 +13,6 @@ venv.bak/
 
 # Text files
 *.txt
+
+# Python
+**/__pycache__/

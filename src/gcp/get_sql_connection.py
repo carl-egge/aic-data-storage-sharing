@@ -4,9 +4,8 @@
 # The credentials are in the .env file and correspond to the test-db instance on the
 # data-storage project.
 
-import os, sys
+import os
 from google.cloud.sql.connector import Connector
-import sqlalchemy
 from dotenv import load_dotenv
 
 
@@ -29,7 +28,7 @@ def getconn():
 	instance_name = os.getenv("instance_name")
 	db_user = os.getenv("db_user")
 	db_pass = os.getenv("db_pass")
-	db_name = os.get("db_name")
+	db_name = os.getenv("db_name")
 
 	# initialize parameters
 	INSTANCE_CONNECTION_NAME = f"{project_id}:{region}:{instance_name}"

@@ -6,21 +6,17 @@
 # data is stored encrypted with little metadata in a SQL database.
 
 # General imports (maybe we don't need all of them)
-import os, sys, argparse, time, signal
+import os, sys, signal, math
+from datetime import datetime
+# import argparse, time
 
-# Imports for the GrovePi
+# Imports for the GrovePi and GCP
 import grovepi
 import sqlalchemy
-import math
-import time
-from datetime import datetime
 
-# local imports
-from encryption.symmetric import encrypt_data, read_key
+# Local imports
+from encryption.symmetric import encrypt_data, read_key, generate_encryption_key
 from gcp.get_sql_connection import getconn
-
-# temporary imports
-#import sqlite3
 
 #-------------------------------------------------------------------------------
 
@@ -28,7 +24,6 @@ from gcp.get_sql_connection import getconn
 # TODO: Later I cloud add a command line interface to the script here or we can 
 #      just use a config file to set the batch size and other parameters. Or we
 #      do this in a graphical user interface.
-
 
 # This function is called when the script is terminated by the user
 def signal_handler(signal, frame):
@@ -39,17 +34,21 @@ signal.signal(signal.SIGINT, signal_handler)
 
 #-------------------------------------------------------------------------------
 
-# TODO: Ahmad, change this such that it consumes the data from the grovepi sensors
-# and stores it in this dictionary:
+####################  Grovepi sensor data consumption  #########################
+
+# In this section we consume the data from the grovepi sensors. We can use the
+# grovepi library for this. For now we can just use a predefined batch size and
+# store the data in a simple data structure like a list/dictionary.
+
+data = []  # List to store sensor data
 
 # Connect the Grove Temperature & Humidity Sensor Pro to digital port D4
 sensor = 4  # The Sensor goes on digital port 4.
+
 # Connect the Grove Air Quality Sensor to analog port A0
 air_sensor = 0
 
 grovepi.pinMode(air_sensor, "INPUT")
-
-data = []  # List to store sensor data
 
 # temp_humidity_sensor_type
 blue = 0  # The Blue colored sensor.
@@ -98,26 +97,28 @@ try:
 except IOError:
     print("Error")
 
-
-####################  Grovepi sensor data consumption  #########################
-# In this section we consume the data from the grovepi sensors. We can use the
-# grovepi library for this. For now we can just use a predefined batch size and
-# store the data in a simple data structure like a list or dictionary.
-
-
-
 #-------------------------------------------------------------------------------
 
 ###########################    Data encryption    ##############################
 
-# Convert to string
-data_str = str(data)
+# In this section we check if a symmetric key is already stored in the filesystem.
+# If not we generate a new key. Also we encrypt the data with the key.
+
+if not os.path.exists("../encryption_key_storage.txt"):
+    generate_encryption_key()
+    print("New key generated")
 
 # Call encryption function
-encrypted_data = encrypt_data(data_str, read_key())
+encrypted_data = encrypt_data(str(data), read_key())
 
 #-------------------------------------------------------------------------------
+
 #################### Upload data to cloud storage  #############################
+
+# In this section we upload the encrypted data to the cloud storage. We can use
+# a sqlalchemy connection pool for this. The data is stored in a SQL database.
+# We use the getconn() function from the get_sql_connection.py script to get a
+# connection to the database.
 
 # create connection pool
 pool = sqlalchemy.create_engine(
@@ -127,29 +128,26 @@ pool = sqlalchemy.create_engine(
 
 # connect to connection pool
 with pool.connect() as db_conn:
-  # TODO: Create table sql statement for the sensor data table
-  # The columns should be: id, encrypted_data
-  #create SQL table and insert
-  db_conn.execute(
-    sqlalchemy.text(
-      "CREATE TABLE IF NOT EXISTS sensors_data "
-      "( id SERIAL NOT NULL, encrypted_data VARCHAR(255) NOT NULL, "
-      "PRIMARY KEY (id));"
+    # create table if not exists
+    db_conn.execute(
+        sqlalchemy.text(
+            "CREATE TABLE IF NOT EXISTS sensors_data "
+            "( id SERIAL NOT NULL, encrypted_data VARCHAR(2550) NOT NULL, "
+            "PRIMARY KEY (id));"
+        )
     )
-  )
 
-  db_conn.commit()
+    db_conn.commit()
 
-  # insert data into our ratings table
-  # TODO: Insert the encrypted data into the table
-  insert_stmt = sqlalchemy.text(
-       "INSERT INTO sensors_data (encrypted_data) VALUES (:encrypted_data)",
-  )
+    # insert data into our ratings table
+    insert_stmt = sqlalchemy.text(
+        "INSERT INTO sensors_data (encrypted_data) VALUES (:encrypted_data)",
+    )
 
-  # insert entries into table
-  db_conn.execute(insert_stmt, parameters={"encrypted_data": encrypted_data})
+    # insert entries into table
+    db_conn.execute(insert_stmt, parameters={"encrypted_data": encrypted_data})
 
-  # commit transactions
-  db_conn.commit() 
+    # commit transactions
+    db_conn.commit() 
 
 print("Success! Data uploaded to cloud storage!")
