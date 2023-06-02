@@ -9,3 +9,6 @@ venv.bak/
 
 # Database
 *.db
+
+# Text files
+*.txt

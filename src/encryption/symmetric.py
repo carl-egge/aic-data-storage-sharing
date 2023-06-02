@@ -8,20 +8,15 @@
 import cryptography
 from cryptography.fernet import Fernet
 
-file_path = "../encryption_key_storage.txt"
-
 # This function generates a new key and stores it in the filesystem
 def generate_encryption_key():
     encryption_key = Fernet.generate_key()
-    with open(file_path, "w") as texttxt:
+    with open("../encryption_key_storage.txt", "w") as texttxt:
         texttxt.write(str(encryption_key))
-
-# Test encryption key generation
-generate_encryption_key()
 
 # This function reads the key from the filesystem
 def read_key():
-    with open(file_path, "r") as file:
+    with open("../encryption_key_storage.txt", "r") as file:
         encryption_key = file.read()
     return str(encryption_key)
 
