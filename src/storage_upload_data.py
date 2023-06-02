@@ -117,7 +117,6 @@ data_str = str(data)
 encrypted_data = encrypt_data(data_str, read_key())
 
 #-------------------------------------------------------------------------------
-
 #################### Upload data to cloud storage  #############################
 
 # create connection pool
@@ -130,9 +129,12 @@ pool = sqlalchemy.create_engine(
 with pool.connect() as db_conn:
   # TODO: Create table sql statement for the sensor data table
   # The columns should be: id, encrypted_data
+  #create SQL table and insert
   db_conn.execute(
     sqlalchemy.text(
-      "CREATE TABLE IF NOT EXISTS ..."
+      "CREATE TABLE IF NOT EXISTS sensors_data "
+      "( id SERIAL NOT NULL, encrypted_data VARCHAR(255) NOT NULL, "
+      "PRIMARY KEY (id));"
     )
   )
 
@@ -141,14 +143,13 @@ with pool.connect() as db_conn:
   # insert data into our ratings table
   # TODO: Insert the encrypted data into the table
   insert_stmt = sqlalchemy.text(
-      "INSERT INTO ...",
+       "INSERT INTO sensors_data (encrypted_data) VALUES (:encrypted_data)",
   )
 
   # insert entries into table
   db_conn.execute(insert_stmt, parameters={"encrypted_data": encrypted_data})
 
   # commit transactions
-  db_conn.commit()
-
+  db_conn.commit() 
 
 print("Success! Data uploaded to cloud storage!")
