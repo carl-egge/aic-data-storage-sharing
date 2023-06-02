@@ -11,14 +11,24 @@ from cryptography.fernet import Fernet
 # This function generates a new key and stores it in the filesystem
 def generate_encryption_key():
     encryption_key = Fernet.generate_key()
+    encoded_key = encryption_key.decode()  # Convert bytes to string
     with open("../encryption_key_storage.txt", "w") as texttxt:
-        texttxt.write(str(encryption_key))
+        texttxt.write(encoded_key)
+
+#generate_encryption_key()
 
 # This function reads the key from the filesystem
 def read_key():
     with open("../encryption_key_storage.txt", "r") as file:
-        encryption_key = file.read()
-    return str(encryption_key)
+        encoded_key = file.read()
+        encryption_key = encoded_key.encode() # Convert string to bytes
+    return encryption_key
+
+# Test the read_key function
+generate_encryption_key()
+key = read_key()
+print(type(key))
+print(key)
 
 # This function encrypts the data with the key and returns
 # the encrypted data as a string
