@@ -34,7 +34,7 @@ pool = sqlalchemy.create_engine(
 # connect to connection pool
 with pool.connect() as db_conn:
   # query and fetch test table
-  results = db_conn.execute(sqlalchemy.text("SELECT * FROM test")).fetchall()
+  results = db_conn.execute(sqlalchemy.text("SELECT * FROM sensors_data")).fetchall()
 
   # show results
   for row in results:
