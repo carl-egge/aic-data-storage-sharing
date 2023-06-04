@@ -37,8 +37,14 @@ with pool.connect() as db_conn:
   results = db_conn.execute(sqlalchemy.text("SELECT * FROM sensors_data")).fetchall()
 
   # show results
-  for row in results:
+  #for row in results:
     # decrypt data
-    decrypt_data = decrypt_data(row[1], read_key())
+   # decrypt_data = decrypt_data(row[1], read_key())
 
-    print(f"Decrypted data: {decrypt_data}\n")
+    #print(f"Decrypted data: {decrypt_data}\n")
+    # show results
+  last_row = results[-1]
+  token = last_row[1].encode()  # Convert token to bytes
+
+  decrypt_data = decrypt_data(token, read_key())
+  print(f"Decrypted data: {decrypt_data}\n")
