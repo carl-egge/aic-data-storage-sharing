@@ -109,7 +109,10 @@ if not os.path.exists("../encryption_key_storage.txt"):
     print("New key generated")
 
 # Call encryption function
+
+print(f"data: {str(data)}\n")
 encrypted_data = encrypt_data(str(data), read_key())
+print(f"data after encrypting: {encrypted_data}\n")
 
 #-------------------------------------------------------------------------------
 

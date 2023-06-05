@@ -45,6 +45,6 @@ with pool.connect() as db_conn:
     # show results
   last_row = results[-1]
   token = last_row[1].encode()  # Convert token to bytes
-
+  print(f"data: {token}\n")
   decrypt_data = decrypt_data(token, read_key())
   print(f"Decrypted data: {decrypt_data}\n")
