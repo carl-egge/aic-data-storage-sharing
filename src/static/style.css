@@ -1,0 +1,134 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: sans-serif;
+    background-color: #e6e3e3;
+}
+
+/**
+* SENSOR DATA TABLE
+*/
+table {
+    border-collapse: collapse;
+}
+.sensor {
+    border: 1px solid black;
+    padding: 20px;
+}
+.sensor td,
+.sensor th {
+    padding: 6px;
+    text-align: center;
+}
+.first_row {
+    border-bottom: 1px solid #333 ;
+}
+.first_col {
+    padding-right: 10px;
+    border-right: 1px solid #333 ;
+    text-align: start;
+}
+
+/**
+* BUTTONS
+*/
+.btn {
+    background-color: white; 
+    color: black; 
+    border: 1px solid #00C1D4;
+    padding: 4px 8px;
+    text-align: center;
+    font-size: 0.8rem;
+    text-decoration: none;
+    display: inline-block;
+    margin: 4px 2px;
+    transition-duration: 0.4s;
+    cursor: pointer;
+}
+
+.btn:hover {
+    background-color: #00C1D4;
+    color: white;
+}
+
+.btn-block {
+    border: 2px solid #00C1D4;
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-size: 1rem;
+    width: 100%;
+}
+
+/**
+* GRID
+*/
+main {
+    width: 90%;
+    margin: 0 auto;
+    padding: 10px;
+}
+
+.grid-container {
+    display: grid;
+    grid-template-columns: auto auto;
+    gap: 10px;
+    padding: 10px;
+}
+  
+.grid-container > div {
+    background-color: rgba(255, 255, 255, 0.8);
+    border: 1px solid black;
+    padding: 10px;
+}
+
+.flashes {
+    background-color: #00c2d4c6;
+    color: white;
+    padding: 10px;
+    margin: 10px;
+    font-size: 0.9rem;
+    text-align: center;
+    list-style-type: none;
+}
+
+/**
+* NAVIGATION AND FOOTER
+*/
+#nav {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #333;
+}
+  
+#nav li {
+    float: left;
+}
+  
+#nav li a {
+    display: block;
+    color: white;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+}
+  
+#nav li a:hover:not(.active) {
+    background-color: #111;
+}
+  
+#nav .right {
+    background-color: #00C1D4;
+}
+
+footer {
+    text-align: center;
+    background-color: #9c9797;
+    padding: 10px;
+    margin-top: auto;
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+}

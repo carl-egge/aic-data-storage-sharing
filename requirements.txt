@@ -8,3 +8,7 @@ cryptography==3.3.2
 cloud-sql-python-connector[pymysql]
 sqlalchemy
 python-dotenv
+
+# User Interface
+flask
+turbo-flask
