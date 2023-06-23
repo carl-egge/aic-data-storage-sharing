@@ -39,9 +39,11 @@
 			<!-- Grid with main content -->
 			<div class="grid-container">
 				<div>{% block content %}{% endblock %}</div>
-				<div>
+				<div style="max-width: 550px">
 					<h3>Live Data from Sensors:</h3>
 					{% include "loaddata.html" %}
+					<h3>Output:</h3>
+					{% include "output.html" %}
 				</div>
 			</div>
 		</main>

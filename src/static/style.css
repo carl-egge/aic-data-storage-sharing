@@ -30,6 +30,16 @@ table {
 }
 
 /**
+* OUTPUT DATA
+*/
+.output p {
+    min-height: 150px;
+    background-color: rgb(69, 70, 72);
+    color: white;
+    padding: 10px;
+}
+
+/**
 * BUTTONS
 */
 .btn {
