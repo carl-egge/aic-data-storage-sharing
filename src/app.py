@@ -1,5 +1,6 @@
 import random, time, threading
 from flask import Flask, render_template, request, redirect, flash, url_for
+from flask import session
 from turbo_flask import Turbo
 import grovepi 
 import os, sys, signal, math
@@ -85,6 +86,7 @@ sensor = 4  # The Sensor goes on digital port 4.
 # Connect the Grove Air Quality Sensor to analog port A0
 air_sensor = 0
 
+sensor_data = []
 grovepi.pinMode(air_sensor, "INPUT")
 
 # temp_humidity_sensor_type
@@ -108,6 +110,7 @@ def inject_load():
     Currently just generates random data
     TODO: Replace with real sensor data
     '''
+    sensor_data.clear()
     [temp, humidity] = grovepi.dht(sensor, blue)
     sensor_value = grovepi.analogRead(air_sensor)
     if sensor_value > 700:
@@ -122,6 +125,30 @@ def inject_load():
         temperature_status = 'Hot' if temp > 30 else 'Cold' if temp < 20 else 'Normal'
 
     humidity_status = 'High humidity' if humidity > 70 else 'Normal humidity'
+    
+    temperature_data = {
+            "time": datetime.now(),
+            "sensor_type": "Temperature",
+            "value": temp,
+            "description": temperature_status
+    }
+
+    humidity_data = {
+            "time": datetime.now(),
+            "sensor_type": "Humidity",
+            "value": humidity,
+            "description": humidity_status
+    }
+    air_quality_data = {
+        "time": datetime.now(),
+        "sensor_type": "Air Quality",
+        "value": sensor_value,
+        "description": pollution_status
+    }
+
+    sensor_data.append(temperature_data)
+    sensor_data.append(humidity_data)
+    sensor_data.append(air_quality_data)
 
     return { 
         'temp': {'time': datetime.now(), 'value': temp, 'desc': temperature_status},
@@ -146,29 +173,45 @@ def index():
 def store_data():
     '''
     Stores the sensor data in the GCP instance
+    '''
     
-    sensor_data = inject_load()
     string_data = str(sensor_data)
     encrypted_data_string = encrypt_data(string_data, read_key())
-    app.config['encrypted_data_string'] = encrypted_data_string  # Store decrypted_data in app context
-    '''
-    flash('Not implemented yet')
+   # app.config['encrypted_data_string'] = encrypted_data_string  # Store decrypted_data in app context
+    pool = sqlalchemy.create_engine(
+    "mysql+pymysql://",
+    creator=getconn,
+    )
+
+    # connect to connection pool
+    with pool.connect() as db_conn:
+        # create table if not exists
+        db_conn.execute(
+            sqlalchemy.text(
+                "CREATE TABLE IF NOT EXISTS sensors_data "
+                "( id SERIAL NOT NULL, encrypted_data VARCHAR(2550) NOT NULL, "
+                "PRIMARY KEY (id));"
+            )
+        )
+
+        db_conn.commit()
+
+        # insert data into our ratings table
+        insert_stmt = sqlalchemy.text(
+            "INSERT INTO sensors_data (encrypted_data) VALUES (:encrypted_data)",
+        )
+
+        # insert entries into table
+        db_conn.execute(insert_stmt, parameters={"encrypted_data": encrypted_data_string})
+
+        # commit transactions
+        db_conn.commit() 
+        
+    session['output'] = encrypted_data_string
+    flash('data stored')
     return redirect("/")
 
 
-'''
-@app.context_processor
-def inject_load():
-   
-    Injects the output of the data sharing and data storage functions into the template context
-    TODO: Replace with real data
-    
-    encrypted_data_string = app.config.get('encrypted_data_string')
-    
-    return {
-        'output': encrypted_data_stringy
-    }
-'''
 @app.route('/retrieve-data', methods=['POST'])
 def retrieve_data():
     '''
@@ -186,7 +229,9 @@ def retrieve_data():
         token = last_row[1].encode()  # Convert token to bytes
         decrypted_data = decrypt_data(token, read_key())
 
-        app.config['decrypted_data'] = decrypted_data  # Store decrypted_data in app context
+        session['output'] = decrypted_data
+        flash('data retrieved')
+
 
     return redirect("/")
 
@@ -197,9 +242,13 @@ def inject_load():
     Injects the output of the data sharing and data storage functions into the template context
     TODO: Replace with real data
     '''
-    decrypted_data = app.config.get('decrypted_data')  # Retrieve decrypted data from app context
-    return {
-        'output': decrypted_data 
+    if 'output' in session:
+        output = session['output']
+    else:
+        output = "No output available"
+
+    return { 
+        'output': output
     }
 
 
