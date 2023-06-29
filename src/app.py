@@ -1,6 +1,19 @@
 import random, time, threading
 from flask import Flask, render_template, request, redirect, flash, url_for
 from turbo_flask import Turbo
+import grovepi 
+import os, sys, signal, math
+from datetime import datetime
+
+sensor = 4  # The Sensor goes on digital port 4.
+
+# Connect the Grove Air Quality Sensor to analog port A0
+air_sensor = 0
+
+grovepi.pinMode(air_sensor, "INPUT")
+
+# temp_humidity_sensor_type
+blue = 0  # The Blue colored sensor.
 
 app = Flask(__name__)
 turbo = Turbo(app)
@@ -20,11 +33,25 @@ def inject_load():
     Currently just generates random data
     TODO: Replace with real sensor data
     '''
-    load = [int(random.random() * 100) / 100 for _ in range(3)]
+    [temp, humidity] = grovepi.dht(sensor, blue)
+    sensor_value = grovepi.analogRead(air_sensor)
+    if sensor_value > 700:
+        pollution_status = "High pollution"
+    elif sensor_value > 300:
+        pollution_status = "Low pollution"
+    else:
+        pollution_status = "Air fresh"
+
+    temperature_status = 'Unknown'
+    if not (math.isnan(temp) or math.isnan(humidity)):
+        temperature_status = 'Hot' if temp > 30 else 'Cold' if temp < 20 else 'Normal'
+
+    humidity_status = 'High humidity' if humidity > 70 else 'Normal humidity'
+
     return { 
-        'temp': {'time': '1970-01-01T00:00:00', 'value': load[1], 'desc': 'Cold'},
-        'humi': {'time': load[0], 'value': load[1], 'desc': load[2]},
-        'poll': {'time': load[0], 'value': load[1], 'desc': load[2]}
+        'temp': {'time': datetime.now(), 'value': temp, 'desc': temperature_status},
+        'humi': {'time': datetime.now(), 'value': humidity, 'desc': humidity_status},
+        'poll': {'time': datetime.now(), 'value': sensor_value, 'desc': pollution_status}
     }
 
 
