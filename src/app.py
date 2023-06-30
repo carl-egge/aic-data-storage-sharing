@@ -1,15 +1,92 @@
 import random, time, threading
 from flask import Flask, render_template, request, redirect, flash, url_for
+from flask import session
 from turbo_flask import Turbo
 import grovepi 
 import os, sys, signal, math
 from datetime import datetime
+import os
+from google.cloud.sql.connector import Connector
+from dotenv import load_dotenv
+import sqlalchemy
+from cryptography.fernet import Fernet
+
+
+
+# This function generates a new key and stores it in the filesystem
+def generate_encryption_key():
+    encryption_key = Fernet.generate_key()
+    encoded_key = encryption_key.decode()  # Convert bytes to string
+    with open("../encryption_key_storage.txt", "w") as texttxt:
+        texttxt.write(encoded_key)
+
+# This function reads the key from the filesystem
+def read_key():
+    with open("../encryption_key_storage.txt", "r") as file:
+        encoded_key = file.read()
+        encryption_key = encoded_key.encode() # Convert string to bytes
+    return encryption_key
+
+# This function encrypts the data with the key and returns
+# the encrypted data as a string
+def encrypt_data(data, key):
+    cipher_suite = Fernet(key)
+    encrypted_data = cipher_suite.encrypt(data.encode())
+    return encrypted_data
+
+# This function decrypts the data with the key and returns
+# the decrypted data as a string
+def decrypt_data(data, key):
+    cipher_suite = Fernet(key)
+    decrypted_data = cipher_suite.decrypt(data)
+    return decrypted_data
+
+
+# function to return the database connection
+def getconn():
+
+	# GCP IAM authentication using service account key
+	# In order for this script to work you need to create a service account key, store the JSON and update the path below!
+	# How to create a service account key: https://cloud.google.com/iam/docs/keys-create-delete?hl=de#iam-service-account-keys-create-console
+	# Alternatively you can authenticate using the Google Cloud SDK.
+	credential_path = "/home/pi/aic/gcp_key/aic23-groupb1-data-storage-4f89199ed283.json" # IMPORTANT: Change this to your own path
+	os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = credential_path
+
+	# set config
+	# The .env file with the database credentials is needed for this to work.
+	load_dotenv()
+
+	project_id = os.getenv("project_id")
+	region = os.getenv("region")
+	instance_name = os.getenv("instance_name")
+	db_user = os.getenv("db_user")
+	db_pass = os.getenv("db_pass")
+	db_name = os.getenv("db_name")
+
+	# initialize parameters
+	INSTANCE_CONNECTION_NAME = f"{project_id}:{region}:{instance_name}"
+	print(f"Your instance connection name is: {INSTANCE_CONNECTION_NAME}")
+
+	# initialize Connector object
+	connector = Connector()
+
+	# Establish connection
+	conn = connector.connect(
+		INSTANCE_CONNECTION_NAME,
+		"pymysql",
+		user=db_user,
+		password=db_pass,
+		db=db_name
+	)
+	return conn
+
 
 sensor = 4  # The Sensor goes on digital port 4.
 
 # Connect the Grove Air Quality Sensor to analog port A0
 air_sensor = 0
 
+sensor_data = []
 grovepi.pinMode(air_sensor, "INPUT")
 
 # temp_humidity_sensor_type
@@ -33,6 +110,7 @@ def inject_load():
     Currently just generates random data
     TODO: Replace with real sensor data
     '''
+    sensor_data.clear()
     [temp, humidity] = grovepi.dht(sensor, blue)
     sensor_value = grovepi.analogRead(air_sensor)
     if sensor_value > 700:
@@ -47,22 +125,35 @@ def inject_load():
         temperature_status = 'Hot' if temp > 30 else 'Cold' if temp < 20 else 'Normal'
 
     humidity_status = 'High humidity' if humidity > 70 else 'Normal humidity'
+    
+    temperature_data = {
+            "time": datetime.now(),
+            "sensor_type": "Temperature",
+            "value": temp,
+            "description": temperature_status
+    }
+
+    humidity_data = {
+            "time": datetime.now(),
+            "sensor_type": "Humidity",
+            "value": humidity,
+            "description": humidity_status
+    }
+    air_quality_data = {
+        "time": datetime.now(),
+        "sensor_type": "Air Quality",
+        "value": sensor_value,
+        "description": pollution_status
+    }
+
+    sensor_data.append(temperature_data)
+    sensor_data.append(humidity_data)
+    sensor_data.append(air_quality_data)
 
     return { 
         'temp': {'time': datetime.now(), 'value': temp, 'desc': temperature_status},
         'humi': {'time': datetime.now(), 'value': humidity, 'desc': humidity_status},
         'poll': {'time': datetime.now(), 'value': sensor_value, 'desc': pollution_status}
-    }
-
-
-@app.context_processor
-def inject_load():
-    '''
-    Injects the output of the data sharing and data storage functions into the template context
-    TODO: Replace with real data
-    '''
-    return { 
-        'output': 'Here we could display the output of the data sharing and data storage functions'
     }
 
 
@@ -83,8 +174,41 @@ def store_data():
     '''
     Stores the sensor data in the GCP instance
     '''
-    flash('Not implemented yet')
-    # flash('Success! Data stored in GCP')
+    
+    string_data = str(sensor_data)
+    encrypted_data_string = encrypt_data(string_data, read_key())
+   # app.config['encrypted_data_string'] = encrypted_data_string  # Store decrypted_data in app context
+    pool = sqlalchemy.create_engine(
+    "mysql+pymysql://",
+    creator=getconn,
+    )
+
+    # connect to connection pool
+    with pool.connect() as db_conn:
+        # create table if not exists
+        db_conn.execute(
+            sqlalchemy.text(
+                "CREATE TABLE IF NOT EXISTS sensors_data "
+                "( id SERIAL NOT NULL, encrypted_data VARCHAR(2550) NOT NULL, "
+                "PRIMARY KEY (id));"
+            )
+        )
+
+        db_conn.commit()
+
+        # insert data into our ratings table
+        insert_stmt = sqlalchemy.text(
+            "INSERT INTO sensors_data (encrypted_data) VALUES (:encrypted_data)",
+        )
+
+        # insert entries into table
+        db_conn.execute(insert_stmt, parameters={"encrypted_data": encrypted_data_string})
+
+        # commit transactions
+        db_conn.commit() 
+        
+    session['output'] = encrypted_data_string
+    flash('data stored')
     return redirect("/")
 
 
@@ -93,9 +217,40 @@ def retrieve_data():
     '''
     Retrieves the sensor data from the GCP instance
     '''
-    flash('Not implemented yet')
-    # flash('Success! Data retrieved from GCP')
+    pool = sqlalchemy.create_engine(
+        "mysql+pymysql://",
+        creator=getconn,
+    )
+    with pool.connect() as db_conn:
+        # query and fetch test table
+        results = db_conn.execute(sqlalchemy.text("SELECT * FROM sensors_data")).fetchall()
+
+        last_row = results[-1]
+        token = last_row[1].encode()  # Convert token to bytes
+        decrypted_data = decrypt_data(token, read_key())
+
+        session['output'] = decrypted_data
+        flash('data retrieved')
+
+
     return redirect("/")
+
+
+@app.context_processor
+def inject_load():
+    '''
+    Injects the output of the data sharing and data storage functions into the template context
+    TODO: Replace with real data
+    '''
+    if 'output' in session:
+        output = session['output']
+    else:
+        output = "No output available"
+
+    return { 
+        'output': output
+    }
+
 
 
 @app.route('/share-data', methods=['POST'])
