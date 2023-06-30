@@ -12,3 +12,6 @@ python-dotenv
 # User Interface
 flask
 turbo-flask
+
+# MQTT
+paho-mqtt

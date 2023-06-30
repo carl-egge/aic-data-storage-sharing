@@ -4,51 +4,47 @@
 	The storage system will involve acquiring streaming data from the sensors,
 	encrypting them in batches and storing them in the Google Cloud.
 </p>
-<form action="/generate-sym-key" method="post">
-	<input
-		type="submit"
-		class="btn btn-block"
-		value="Generate New Symmetric Key"
-	/>
-</form>
-<form action="/connect-to-gcp" method="post">
-	<input
-		type="submit"
-		class="btn btn-block"
-		value="Connect to GCP SQL instance"
-	/>
-</form>
-<form action="/store-data" method="post">
-	<input
-		type="submit"
-		class="btn btn-block"
-		value="Store Encrypted Data Batch"
-	/>
-</form>
-<form action="/retrieve-data" method="post">
-	<input
-		type="submit"
-		class="btn btn-block"
-		value="Retrieve Data and Decrypt"
-	/>
-</form>
+<div>
+	<form class="inline" action="/generate-sym-key" method="post">
+		<input
+			type="submit"
+			class="btn btn-block"
+			value="Generate New Symmetric Key"
+		/>
+	</form>
+	<form class="inline" action="/store-data" method="post">
+		<input
+			type="submit"
+			class="btn btn-block"
+			value="Store Encrypted Data Batch"
+		/>
+	</form>
+	<form class="inline" action="/retrieve-data" method="post">
+		<input
+			type="submit"
+			class="btn btn-block"
+			value="Retrieve Data and Decrypt"
+		/>
+	</form>
+</div>
+<p id="live-key"><strong>Symmetric key: </strong>{{ sym_key }}</p>
 <hr />
 <h3>Data Sharing Sytem</h3>
 <p>
 	The sharing system should enable end-to-end encrypted peer-to-peer data
 	transmission between two parties.
 </p>
-<form action="/exchange-keys" method="post">
+<form class="inline" action="/exchange-keys" method="post">
 	<input type="submit" class="btn btn-block" value="Exchange Keys" />
 </form>
-<p><strong>Shared secret: </strong>{{ shared_secret }}</p>
-<form action="/share-data" method="post">
+<form class="inline" action="/share-data" method="post">
 	<input
 		type="submit"
 		class="btn btn-block"
 		value="Share Encrypted Data Batch"
 	/>
 </form>
+<p><strong>Shared secret: </strong>{{ shared_secret }}</p>
 <hr />
 <h3>Config</h3>
 <form action="/set-batch-size" method="post">

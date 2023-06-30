@@ -5,32 +5,40 @@
 # the filesystem.
 
 # imports
+import os
 from cryptography.fernet import Fernet
 
 # This function generates a new key and stores it in the filesystem
-def generate_encryption_key():
+def generate_encryption_key(path):
     encryption_key = Fernet.generate_key()
-    encoded_key = encryption_key.decode()  # Convert bytes to string
-    with open("../encryption_key_storage.txt", "w") as texttxt:
-        texttxt.write(encoded_key)
+    string_key = encryption_key.decode()  # Convert bytes to string
+    with open(path, "w") as file:
+        file.write(string_key)
+    return string_key
 
 # This function reads the key from the filesystem
+# If no key exists, a new key is generated
 def read_key():
-    with open("../encryption_key_storage.txt", "r") as file:
-        encoded_key = file.read()
-        encryption_key = encoded_key.encode() # Convert string to bytes
-    return encryption_key
+    path = "encryption_key_storage.txt"
+    # Check if key exists
+    if not os.path.exists(path):
+        print("No key found, generating new key...")
+        generate_encryption_key(path)
+    # Read key from file
+    with open(path, "r") as file:
+        string_key = file.read()
+    return string_key
 
 # This function encrypts the data with the key and returns
 # the encrypted data as a string
 def encrypt_data(data, key):
-    cipher_suite = Fernet(key)
+    cipher_suite = Fernet(key.encode())
     encrypted_data = cipher_suite.encrypt(data.encode())
     return encrypted_data
 
 # This function decrypts the data with the key and returns
 # the decrypted data as a string
 def decrypt_data(data, key):
-    cipher_suite = Fernet(key)
+    cipher_suite = Fernet(key.encode())
     decrypted_data = cipher_suite.decrypt(data)
     return decrypted_data
