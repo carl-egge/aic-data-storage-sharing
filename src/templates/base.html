@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>AIC Project B1</title>
+		<!-- Inject turbo.js into template for dynamic updates of page -->
+		{{ turbo() }}
+		<link
+			rel="stylesheet"
+			href="{{ url_for('static', filename='style.css') }}"
+		/>
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+	</head>
+	<body>
+		<header>
+			<ul id="nav">
+				<li><a href="/">AIC :: Project B1 - Data Storage/Sharing</a></li>
+				<li style="float: right">
+					<a
+						class="right"
+						href="https://collaborating.tuhh.de/e-19/teaching/project_b1"
+						target="_blank"
+					>
+						GitLab Repo
+					</a>
+				</li>
+			</ul>
+		</header>
+
+		<main>
+			<!-- Show messages -->
+			{% with messages = get_flashed_messages() %} {% if messages %}
+			<ul class="flashes">
+				{% for message in messages %}
+				<li>{{ message }}</li>
+				{% endfor %}
+			</ul>
+			{% endif %} {% endwith %}
+
+			<!-- Grid with main content -->
+			<div class="grid-container">
+				<div>{% block content %}{% endblock %}</div>
+				<div style="max-width: 550px">
+					<h3>Live Data from Sensors:</h3>
+					{% include "loaddata.html" %}
+					<h3>Output:</h3>
+					{% include "output.html" %}
+				</div>
+			</div>
+		</main>
+
+		<footer>
+			<p>Team B1</p>
+			<p>
+				Ahmad Hawat | Carl Egge | Ghislain Nkamdjin Njike | Mohammad Rayhanur
+				Rahman
+			</p>
+		</footer>
+	</body>
+</html>

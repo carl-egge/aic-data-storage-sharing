@@ -34,6 +34,17 @@ source <my_env_name>/bin/activate
 pip install -r requirements.txt
 ```
 
+### Run the project
+
+The poject is a simple flask application. Be sure to install all the necessary packages in the virtual environment.
+
+```bash
+cd src/
+flask run
+```
+
+The project will now be served on `http://127.0.0.1:5000`
+
 ### IAM Authentication to GCP
 
 In order to connect to the Google Cloud SQL Service we need to authenticate the process using either the gcloud SDK tools and the user credentials of the Google account or the generate a service account key with the SQL Client priviledge and store the keypath in the local environment.
@@ -42,3 +53,10 @@ In order to connect to the Google Cloud SQL Service we need to authenticate the 
 
 For security reasons the credentials for the GCP SQL instance are stored in a local enviroment file (.env) that is not in this GitLab repository.
 Without the credentials from the .env file it is not possible to connect to the SQL instance.
+
+### Flask
+
+See helpful links:
+
+- [Official Documentation](https://flask.palletsprojects.com/en/2.3.x/)
+- [Dynamically Update UI with Flask Turbo](https://blog.miguelgrinberg.com/post/dynamically-update-your-flask-web-pages-using-turbo-flask)
