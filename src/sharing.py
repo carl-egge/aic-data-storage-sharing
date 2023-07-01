@@ -41,8 +41,6 @@ class DataSharing:
 
         # Subscribe to the topic
         client.subscribe("key_exchange")
-        # Publish your public key
-        client.publish("key_exchange", dh_pubkey)
 
         # Define callback function for the MQTT client
         def on_message(client, userdata, message):
@@ -57,6 +55,9 @@ class DataSharing:
         client.on_message = on_message
         # Run the MQTT loop
         client.loop_start()
+        
+        # Publish your public key
+        client.publish("key_exchange", dh_pubkey)
 
         # Wait for the shared secret to be calculated
         while self.shared_secret == "NaN":

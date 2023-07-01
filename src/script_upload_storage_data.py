@@ -9,7 +9,7 @@ from storage import DataStorage
 
 print("Hint: This is just a script to store the data from the storage. It is not part of the flask application.")
 
-print("Retrieving encrypted data from storage...\n")
+print("Upload encrypted data to storage...\n")
 
 # Initialize DataStorage object
 data_storage = DataStorage()

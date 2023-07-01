@@ -88,7 +88,7 @@ def generate_sym_key():
     Generates a new symmetric key and stores it in the filesystem
     '''
     store.generate_sym_key()
-    # flash('Success! Symmetric key generated')
+    flash('Success! Symmetric key generated')
     return redirect("/")
 
 
@@ -97,8 +97,8 @@ def exchange_keys():
     '''
     Run asymmetric key exchange through mqtt and calculate the shared secret
     '''
-    flash('Not implemented yet')
-    # flash('Success! Shared secret calculated')
+    share.run_key_exchange()
+    flash('Success! Shared secret calculated')
     return redirect("/")
 
 
