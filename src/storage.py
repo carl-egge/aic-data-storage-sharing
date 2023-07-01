@@ -3,9 +3,12 @@
 # Import libraries
 import sqlalchemy
 
-from .encryption.symmetric import decrypt_data, read_key, encrypt_data, generate_encryption_key
-from .gcp.get_sql_connection import getconn
-from .sensor.sensors import one_sensor_data_readout
+from encryption.symmetric import decrypt_data, read_key, encrypt_data, generate_encryption_key
+from gcp.get_sql_connection import getconn
+
+# TODO: Change this import to the real sensor data consumption if working on the pi:
+# from sensor.sensor import one_sensor_data_readout
+from sensor.fakesensors import one_sensor_data_readout
 
 
 class DataStorage:
@@ -40,7 +43,7 @@ class DataStorage:
         # Grovepi sensor data consumption
         if sensor_data is None:
             print("Consuming data from sensors...")
-            data = one_sensor_data_readout(True)
+            data = one_sensor_data_readout()
         else:
             data = sensor_data
 

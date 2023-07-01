@@ -3,6 +3,7 @@ grovepi
 
 # Cryptography
 cryptography==3.3.2
+pyDH
 
 # GCP requirements
 cloud-sql-python-connector[pymysql]
