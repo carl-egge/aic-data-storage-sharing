@@ -7,8 +7,8 @@ import paho.mqtt.client as mqtt
 import pyDH
 
 # TODO: Change this import to the real sensor data consumption if working on the pi:
-# from sensor.sensor import one_sensor_data_readout
-from sensor.fakesensors import one_sensor_data_readout
+from sensor.sensors import one_sensor_data_readout
+# from sensor.fakesensors import one_sensor_data_readout
 
 class DataSharing:
     '''
@@ -108,7 +108,7 @@ class DataSharing:
         self.batch_size = batch_size
 
 
-    def connect_mqtt_broker(self, broker_address = '192.168.1.105', port = 1883):
+    def connect_mqtt_broker(self, broker_address = '84.58.225.213', port = 1883):
         '''
         Connects to the MQTT broker
         '''

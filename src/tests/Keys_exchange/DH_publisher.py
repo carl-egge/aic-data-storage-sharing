@@ -35,7 +35,7 @@ with open(public_key_path, "wb") as key_file:
     )
 
 # Connect to the MQTT broker
-mqtt_broker = "192.168.1.104"
+mqtt_broker = "84.58.225.213"
 mqtt_port = 1883
 mqtt_topic = "diffie_hellman_key_exchange"
 

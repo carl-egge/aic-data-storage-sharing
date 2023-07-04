@@ -3,7 +3,7 @@ import random
 import paho.mqtt.client as mqtt
 
 # MQTT broker settings
-broker_address = '192.168.1.105' #You have to insert your own Ip Adress 
+broker_address = '84.58.225.213' #You have to insert your own Ip Adress 
 broker_port = 1883
 
 # Create a MQTT client

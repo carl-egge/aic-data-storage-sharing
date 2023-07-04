@@ -8,9 +8,9 @@ from flask import Flask, render_template, request, redirect, flash, url_for
 from turbo_flask import Turbo
 # from flask import session
 
-from .sensor.sensors import one_sensor_data_readout
-from .sharing import DataSharing
-from .storage import DataStorage
+from sensor.sensors import one_sensor_data_readout
+from sharing import DataSharing
+from storage import DataStorage
 
 app = Flask(__name__)
 turbo = Turbo(app)
@@ -35,7 +35,7 @@ def inject_load():
     Injects the sensor data into the template context
     '''
     global sensor_data
-    sensor_data = one_sensor_data_readout(True)
+    sensor_data = one_sensor_data_readout()
     return { 
         'temp': {'time': sensor_data[0]["time"], 'value': sensor_data[0]["value"], 'desc': sensor_data[0]["description"]},
         'humi': {'time': sensor_data[1]["time"], 'value': sensor_data[1]["value"], 'desc': sensor_data[1]["description"]},

@@ -7,8 +7,8 @@ from encryption.symmetric import decrypt_data, read_key, encrypt_data, generate_
 from gcp.get_sql_connection import getconn
 
 # TODO: Change this import to the real sensor data consumption if working on the pi:
-# from sensor.sensor import one_sensor_data_readout
-from sensor.fakesensors import one_sensor_data_readout
+from sensor.sensors import one_sensor_data_readout
+# from sensor.fakesensors import one_sensor_data_readout
 
 
 class DataStorage:

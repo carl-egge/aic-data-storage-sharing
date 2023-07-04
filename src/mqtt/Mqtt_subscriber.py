@@ -1,7 +1,7 @@
 import paho.mqtt.client as mqtt
 
 # MQTT broker settings
-broker_address = '192.168.1.105' #replace with your own address
+broker_address = '84.58.225.213' #replace with your own address
 broker_port = 1883
 
 # Callback function to handle MQTT messages
