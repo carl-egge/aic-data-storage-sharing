@@ -16,3 +16,5 @@ data_sharing = DataSharing()
 
 # Run the key exchange
 data_sharing.run_key_exchange()
+
+data_sharing.share_data()

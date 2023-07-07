@@ -100,7 +100,7 @@ class DataSharing:
         # -----------------------
         data = one_sensor_data_readout()
 
-        encry_data = encrypt_data(self.shared_secret, data)
+        encry_data = encrypt_data(self.shared_secret, str(data))
 
         client.publish(self.server_channel, encry_data)
         # -----------------------
