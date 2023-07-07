@@ -6,9 +6,11 @@
 import paho.mqtt.client as mqtt
 import pyDH
 
+
 # TODO: Change this import to the real sensor data consumption if working on the pi:
-from sensor.sensors import one_sensor_data_readout
-# from sensor.fakesensors import one_sensor_data_readout
+# from sensor.sensors import one_sensor_data_readout
+from sensor.fakesensors import one_sensor_data_readout
+from encryption.symmetric import encrypt_data
 
 class DataSharing:
     '''
@@ -24,6 +26,13 @@ class DataSharing:
         '''
         self.batch_size = batch_size
         self.shared_secret = shared_secret
+
+        # In the server_channel the pi initiate the key-exchange and publishes sensor data.
+        self.server_channel = "server_channel"
+
+        # In the client_channel the pi subscribe to the incoming messages.
+        self.client_channel = "client_channel"        
+
         print("DataSharing object created with batch size: ", self.batch_size)
 
     # -----------------------------------------------------------------------------------
@@ -40,7 +49,7 @@ class DataSharing:
         dh_pubkey = dh.gen_public_key()
 
         # Subscribe to the topic
-        client.subscribe("key_exchange")
+        client.subscribe(self.client_channel)
 
         # Define callback function for the MQTT client
         def on_message(client, userdata, message):
@@ -57,7 +66,7 @@ class DataSharing:
         client.loop_start()
         
         # Publish your public key
-        client.publish("key_exchange", dh_pubkey)
+        client.publish(self.server_channel, dh_pubkey)
 
         # Wait for the shared secret to be calculated
         while self.shared_secret == "NaN":
@@ -88,23 +97,24 @@ class DataSharing:
         # The data should be symmetrically encrypted using the shared secret as the key
         # You can use our implementation of the AES encryption from the encryption.py file
         # The encrypted data should be sent to the other party using the MQTT client
-        #
-        print("TODO: Implement the data sharing functionality here.")
-
         # -----------------------
-        # YOUR CODE GOES HERE
+        data = one_sensor_data_readout()
+
+        encry_data = encrypt_data(self.shared_secret, data)
+
+        client.publish(self.server_channel, encry_data)
         # -----------------------
 
         # Disconnect from the MQTT broker
         client.disconnect()
 
+    # -----------------------------------------------------------------------------------     
 
     # -----------------------------------------------------------------------------------
 
+
     def set_batch_size(self, batch_size):
-        '''
-        Sets the batch size for the data sharing system
-        '''
+        # Sets the batch size for the data sharing system
         self.batch_size = batch_size
 
 
