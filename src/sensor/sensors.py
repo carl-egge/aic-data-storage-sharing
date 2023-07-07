@@ -19,10 +19,15 @@
 # is used to read out the data from the sensors. The data is then stored in a
 # list of dictionaries and returned to the caller.
 
-import math, random
+import math
 from datetime import datetime
 import grovepi
 
+#
+# one_sensor_data_readout()
+#
+# @return: A list of dictionaries containing the sensor data
+#
 def one_sensor_data_readout():
 
     # intialize data list
@@ -83,4 +88,18 @@ def one_sensor_data_readout():
     except IOError:
         print("Error reading data from sensor")
 
+    return data
+
+#
+# sensor_data_readout()
+#
+# @param batchsize: The number of sensor data readouts to be returned
+# @return: A list of data readout lists containing the sensor data
+#
+def sensor_data_readout(batchsize = 1):
+    data = []
+    for i in range(batchsize):
+        data.append(one_sensor_data_readout())
+
+    # Return type: list of lists
     return data

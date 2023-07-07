@@ -62,7 +62,13 @@ def store_data():
     '''
     global output
     output = "Store Sensor Data: \n" + str(sensor_data)
-    encrypted_data = store.store_data(sensor_data)
+    if store.batch_size == 1:
+        encrypted_data = store.store_data(sensor_data)
+    else:
+        # If batch size is larger than 1, we cannot just store the current sensor data
+        # We need to fetch multiple data points (batch) and store them
+        # store_data() will take care of this
+        encrypted_data = store.store_data()
     flash('Successfully stored data')
     output = "\n\nEncrypted Data: \n" + str(encrypted_data)
     return redirect("/")
