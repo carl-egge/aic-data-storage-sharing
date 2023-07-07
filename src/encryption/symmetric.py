@@ -32,13 +32,13 @@ def read_key():
 # This function encrypts the data with the key and returns
 # the encrypted data as a string
 def encrypt_data(data, key):
-    cipher_suite = Fernet(key.encode())
+    cipher_suite = Fernet(key)
     encrypted_data = cipher_suite.encrypt(data.encode())
     return encrypted_data
 
 # This function decrypts the data with the key and returns
 # the decrypted data as a string
 def decrypt_data(data, key):
-    cipher_suite = Fernet(key.encode())
+    cipher_suite = Fernet(key)
     decrypted_data = cipher_suite.decrypt(data)
     return decrypted_data

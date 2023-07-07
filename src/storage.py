@@ -49,11 +49,7 @@ class DataStorage:
 
         # Call encryption function
         print("Encrypting data...")
-        encrypted_data = encrypt_data(str(data), self.sym_key)
-
-        # Test print statements
-        # print(f"data: {str(data)}\n")
-        # print(f"data after encrypting: {encrypted_data}\n")        
+        encrypted_data = encrypt_data(str(data), self.sym_key.encode())     
 
         # Upload data to cloud storage
         print("Uploading data to cloud storage...")

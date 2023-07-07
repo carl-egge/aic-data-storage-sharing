@@ -4,12 +4,13 @@
 # flask application and handles the main business logic.
 
 import paho.mqtt.client as mqtt
-import pyDH
+import pyDH, base64
 
 
 # TODO: Change this import to the real sensor data consumption if working on the pi:
-# from sensor.sensors import one_sensor_data_readout
-from sensor.fakesensors import one_sensor_data_readout
+from sensor.sensors import one_sensor_data_readout, sensor_data_readout
+# from sensor.fakesensors import one_sensor_data_readout, 
+
 from encryption.symmetric import encrypt_data
 
 class DataSharing:
@@ -87,31 +88,19 @@ class DataSharing:
         # Connect to the MQTT broker
         client = self.connect_mqtt_broker()
         print("MQTT client connected to broker.")
-        # Subscribe to the topic
-        client.subscribe("data_sharing")
         
-        #
-        # TODO: @Rayhan
-        # Please implement the functionality to share the encrypted data with the other party
-        # The data can be retrieved using the one_sensor_data_readout() function from the sensor.py file
-        # The data should be symmetrically encrypted using the shared secret as the key
-        # You can use our implementation of the AES encryption from the encryption.py file
-        # The encrypted data should be sent to the other party using the MQTT client
-        # -----------------------
-        data = one_sensor_data_readout()
+        data = sensor_data_readout(self.batch_size)
 
-        encry_data = encrypt_data(self.shared_secret, str(data))
+        self.shared_secret = base64.urlsafe_b64encode(bytes.fromhex(self.shared_secret))
 
-        client.publish(self.server_channel, encry_data)
-        # -----------------------
+        encry_data = encrypt_data(str(data), self.shared_secret)
+
+        client.publish("data_sharing", encry_data)
 
         # Disconnect from the MQTT broker
         client.disconnect()
 
-    # -----------------------------------------------------------------------------------     
-
     # -----------------------------------------------------------------------------------
-
 
     def set_batch_size(self, batch_size):
         # Sets the batch size for the data sharing system

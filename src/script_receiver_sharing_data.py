@@ -1,5 +1,6 @@
 import pyDH, paho.mqtt.client as mqtt
 from encryption.symmetric import decrypt_data
+import base64
 
 # In the server_channel the pi initiate the key-exchange and publishes sensor data.
 server_channel = "server_channel"
@@ -57,10 +58,12 @@ client.loop_stop()
 # Subscribe to the topic
 client.subscribe("data_sharing")
 
+shared_secret = base64.urlsafe_b64encode(bytes.fromhex(shared_secret))
+
 def on_message(client, userdata, msg):
     encrypted_data = msg.payload
-    decrypted_data = decrypt_data(shared_secret, encrypted_data)
+    decrypted_data = decrypt_data(encrypted_data, shared_secret)
     print("Received and decrypted data:", decrypted_data)
 
 client.on_message = on_message
-client.loop_start()
+client.loop_forever()
