@@ -46,6 +46,9 @@ class DataSharing:
         client = self.connect_mqtt_broker()
         print("MQTT client connected to broker.")
 
+        # Reset the shared secret
+        self.shared_secret = "NaN"
+
         # Create a Diffie-Hellman object
         dh = pyDH.DiffieHellman()
         dh_pubkey = dh.gen_public_key()

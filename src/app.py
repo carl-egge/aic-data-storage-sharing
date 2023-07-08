@@ -113,8 +113,8 @@ def share_data():
     '''
     Shares the sensor data with other peer device
     '''
-    flash('Not implemented yet')
-    # flash('Success! Data shared with other peer')
+    share.share_data()
+    flash('Success! Data shared with other peer')
     return redirect("/")
 
 
