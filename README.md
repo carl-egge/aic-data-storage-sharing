@@ -91,7 +91,10 @@ For security reasons, the credentials for the GCP SQL instance are stored in a l
 
 ### MQTT Broker
 
-For the second part of the project (Sharing System) you will need two clients that can connect through the network. One client must run a MQTT Broker. See [here](https://mosquitto.org/man/mosquitto-8.html) for information. You need to specify the IP address of the broker and the port number also in the `.env` file like so:
+For the second part of the project (Sharing System) you will need two clients that can connect through the network. One client must run a MQTT Broker. See [here](https://collaborating.tuhh.de/e-19/teaching/project_b1/-/wikis/Mqtt-setup) for the installation and setup and  [here](https://mosquitto.org/man/mosquitto-8.html) for more information. 
+
+To connect to the mqtt Broker you need to install the python library paho-mqtt on both devices using the `pip install paho-mqtt` command.
+It is important to specify the IP address of the broker and the port number also in the `.env` file like so:
 
     broker_address = <your-ip-here>
     port = 1883
