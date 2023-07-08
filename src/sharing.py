@@ -30,9 +30,10 @@ class DataSharing:
 
         # In the server_channel the pi initiate the key-exchange and publishes sensor data.
         self.server_channel = "server_channel"
-
         # In the client_channel the pi subscribe to the incoming messages.
-        self.client_channel = "client_channel"        
+        self.client_channel = "client_channel"
+        # In the data_sharing channel the pi publishes actual sensor data.
+        self.data_sharing_channel = "data_sharing"
 
         print("DataSharing object created with batch size: ", self.batch_size)
 
@@ -59,7 +60,11 @@ class DataSharing:
             # Calculate the shared secret
             self.shared_secret = dh.gen_shared_key(other_pubkey)
             # Print the shared secret
-            print("Shared secret: ", self.shared_secret)
+            # print("Shared secret: ", self.shared_secret)
+            # Encode the shared secret to base64
+            self.shared_secret = base64.urlsafe_b64encode(bytes.fromhex(self.shared_secret))
+            # Print the shared secret encoded
+            print("Shared encoded secret : ", self.shared_secret)
 
         # Set the callback function
         client.on_message = on_message
@@ -89,13 +94,14 @@ class DataSharing:
         client = self.connect_mqtt_broker()
         print("MQTT client connected to broker.")
         
+        # Read the sensor data according to the batch size
         data = sensor_data_readout(self.batch_size)
 
-        self.shared_secret = base64.urlsafe_b64encode(bytes.fromhex(self.shared_secret))
-
+        # Encrypt the data
         encry_data = encrypt_data(str(data), self.shared_secret)
 
-        client.publish("data_sharing", encry_data)
+        # Publish the encrypted data
+        client.publish(self.data_sharing_channel, encry_data)
 
         # Disconnect from the MQTT broker
         client.disconnect()

@@ -49,7 +49,7 @@ class DataStorage:
 
         # Call encryption function
         print("Encrypting data...")
-        encrypted_data = encrypt_data(str(data), self.sym_key.encode())     
+        encrypted_data = encrypt_data(str(data), self.sym_key)     
 
         # Upload data to cloud storage
         print("Uploading data to cloud storage...")
@@ -115,10 +115,10 @@ class DataStorage:
             
         # Show Last Element from results
         last_row = results[-1]
-        # Convert token to bytes
-        token = last_row[1].encode()
-        print(f"data: {token}\n")
-        decrypted_data = decrypt_data(token, read_key())
+        # Get actual payload from second column
+        payload = last_row[1]
+        print(f"data: {payload}\n")
+        decrypted_data = decrypt_data(payload.encode(), read_key())
         print(f"Decrypted data: {decrypted_data}\n")
 
         return decrypted_data
